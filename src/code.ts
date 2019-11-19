@@ -1,36 +1,56 @@
-import {Observable} from "rxjs/Observable"
-import {Subject} from "rxjs/Subject"
-import 'rxjs/add/operator/skipUntil';
-import { map, filter, reduce } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { consolePrint } from "./utils/operators";
 
-let observable = Observable.create((observer:any)=>{
-  let i = 1
-  setInterval(() => {
-    observer.next(i++)
-  }, 1000);
-})
+import { fromFetch } from 'rxjs/fetch';
+import {
+  map,
+  switchMap,
+  startWith,
+  combineLatest
+} from 'rxjs/operators';
+import {fromEvent, Observable } from 'rxjs';
 
-let subject = new Subject
 
-setTimeout(() => {
-  subject.next()
-}, 3000);
+let closeButton1 = document.querySelector('.close1');
+let closeButton2 = document.querySelector('.close2');
+let closeButton3 = document.querySelector('.close3');
+let close1ClickStream = fromEvent(closeButton1, 'click');
+let close2ClickStream = fromEvent(closeButton2, 'click');
+let close3ClickStream = fromEvent(closeButton3, 'click');
+let refreshButton = document.querySelector('.refresh');
+let refreshClickStream = fromEvent(refreshButton, 'click')
 
-let obs = observable.skipUntil(subject)
+interface userInformation {
+  html_url: String,
+  login: String,
+  avatar_url: String
+}
 
-of(1, 2, 3, 4, 5, 6).pipe(
-  filter(x => x < 3),
-  map(x => x * 2),
-  reduce((x, y) => x + y, 0))
-.subscribe(x => addItem(x));
-// consolePrint(obs)
-// obs.subscribe((x:any)=>addItem(x))
+let requestStream = refreshClickStream.pipe(startWith('fire my requests')).pipe(map(() => {
+  let randomOffset = Math.floor(Math.random() * 500);
+  return 'https://api.github.com/users?since=' + randomOffset;
+}))
 
-function addItem(val:any) {
-  var node = document.createElement("li");
-  var textnode = document.createTextNode(val);
-  node.appendChild(textnode);
-  document.getElementById("output").appendChild(node);
+let responseStream = requestStream.pipe(
+  switchMap((url: string) => fromFetch(url).pipe(
+    switchMap(response => response.ok && response.json())
+  ))
+)
+
+let suggestionStream = (closebtnClick: Observable<Event>, selector: string) => closebtnClick.pipe(startWith('initial')).pipe(combineLatest(responseStream, (_, user) => {
+  return user[Math.floor(Math.random() * user.length)]
+})).subscribe((x: userInformation) => renderSuggestion(x, selector))
+
+
+suggestionStream(close1ClickStream, '.stream1')
+suggestionStream(close2ClickStream, '.stream2')
+suggestionStream(close3ClickStream, '.stream3')
+
+
+function renderSuggestion(suggestedUser: userInformation, selector: any) {
+  var suggestionEl = document.querySelector(selector);
+  var usernameEl = suggestionEl.querySelector('.user');
+  usernameEl.href = suggestedUser.html_url;
+  usernameEl.textContent = suggestedUser.login;
+  var imgEl = suggestionEl.querySelector('img');
+  imgEl.src = "";
+  imgEl.src = suggestedUser.avatar_url;
 }

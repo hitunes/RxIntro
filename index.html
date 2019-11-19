@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Learn RxJS with Coursetro</title>
+    <title>RxJs--Everything is a stream</title>
 
     <style>
         body {
@@ -23,12 +23,47 @@
             background: white;
             margin-bottom: 5px;
         }
+        
+        img {
+            height: 50px;
+            width: 50px;
+            margin-right: 10px;
+            background: black;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        
+        .user {
+            margin-right: 10px;
+        }
+        
+        .flex {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
 
 <body>
-    <ul id="output"></ul>
-
+    <div class="header">
+        <h2>Who to follow</h2><a href="#" class="refresh">Refresh</a>
+        <div class="flex stream1">
+            <img />
+            <a href="#" target="_blank" class="user"></a>
+            <a href="#" class="close close1">x</a>
+        </div>
+        <div class="flex stream2">
+            <img />
+            <a href="#" target="_blank" class="user"></a>
+            <a href="#" class="close close2">x</a>
+        </div>
+        <div class="flex stream3">
+            <img />
+            <a href="#" target="_blank" class="user"></a>
+            <a href="#" class="close close3">x</a>
+        </div>
+    </div>
     <script src="/bundle.js"></script>
 </body>
 
